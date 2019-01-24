@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 clean_data = np.loadtxt('co395-cbc-dt/wifi_db/clean_dataset.txt')
 noisy_data = np.loadtxt('co395-cbc-dt/wifi_db/noisy_dataset.txt')
 
@@ -62,25 +63,100 @@ def decision_tree_learning(training_dataset, depth):
     if len(np.unique(training_dataset[:,7])) == 1 :
         # leaf
         Attribute = np.unique(training_dataset[:,7])
-        dt={'Attribute': Attribute, 'Value': 0, 'Left': None, 'Right': None, 'isLeaf': 1}
+
+        dt={'Attribute': int(Attribute), 'Value': 0, 'Left': None, 'Right': None, 'isLeaf': 1}
         return dt , depth
     else:
         split = find_split(training_dataset)
         cut_point = split['Cut_point']
         wifi = split['Wifi']
-        print 'result =', wifi, cut_point, split['Gain']
         left_index = np.where(training_dataset[:,wifi-1] <= cut_point)
         right_index = np.where(training_dataset[:,wifi-1] > cut_point)
         left_dataset = training_dataset[left_index]
         right_dataset = training_dataset[right_index]
         left_branch, left_depth = decision_tree_learning(left_dataset, depth+1)
         right_branch, right_depth = decision_tree_learning(right_dataset, depth+1)
+
         dt = {'Attribute': wifi, 'Value': cut_point, 'Left': left_branch, 'Right': right_branch, 'isLeaf': 0}
         return dt, max(left_depth, right_depth)
 # print find_split(clean_data)
 # decision_tree_learning(clean_data[:1000],0)
 
-def visualize(decision_tree):
-    pass
+
+
+
 dt, depth = decision_tree_learning(clean_data, 0)
 print depth
+print dt
+
+# def visualize(dt):
+#     for key in dt.keys():
+#         if type(dt[key]).__name__ == 'dict':
+#             visualize(dt[key])
+#         else:
+#             print key, ":", dt[key]
+#
+# visualize(dt)
+test_data = [-63,-56,-63,-65,-72,-82,-89,1]
+def evaluation(test_data, dt):
+    Attribute = dt.get('Attribute')
+    value = dt.get('Value')
+    print Attribute, value
+    
+
+evaluation(test_data, dt)
+# for key in dt.keys():
+#     if type(dt[key]).__name__ == 'dict':
+#     if key =='Left' or key == 'Right'
+#     print key
+#     print dt[key]
+
+
+#
+# desisionNode = dict(boxstyle='sawtooth', fc = "0.8")
+# leafNode = dict(boxstyle='round4', fc = '0.8')
+# arrow_args = dict(arrow_args = "<-")
+# numleafs = 0
+# def getNumleafs(decision_tree):
+#     global numleafs
+#     for key, values in decision_tree.items():
+#         if type(values).__name__ == 'dict':
+#             getNumleafs(values)
+#         elif key =='isLeaf':
+#             numleafs+=values
+#
+# def plotMidText(cntrPt, parentPt, txtString):
+#     xMid = (parentPt[0] - cntrPt[0])/2.0 + cntrPt[0]
+#     yMid = (parentPt[1] - cntrPt[1])/2.0 + cntrPt[1]
+#     creatPlot.ax1.text(xMid, yMid, txtString)
+#
+# def plotTree(myTree, parentPt, nodeName, numleafs, depth):
+#     firstStr = list(myTree.keys())[0]
+#     cntrPt = (plotTree.xOff+(0.5/plotTree.totalw+float(numleafs)/2.0/plotTree.totalw), plotTree.yOff)
+#     plotMidText(cntrPt, parentPt, nodeName)
+#     plotNode(firstStr, cntrPt, parentPt, decisionNode)
+#     secondDict = myTree[firstStr]
+#     plotTree.yOff = plotTree.yOff - 1.0/plotTree.totalD
+#     for key in secondDict.keys():
+#         if type(secondDict[key]).__name__=='dict':
+#             plotTree(secondDict[key], cntrPt, str(key))
+#         else:
+#             plotTree.xOff = plotTree.xOff + 1.0/plotTree.totalw
+#             plotNode(secondDict[key], (plotTree.xOff, plotTree.yOff), cntrPt, leafNode)
+#             plotMidText((plotTree.xOff, plotTree.yOff), cntrPt, str(key))
+#     plotTree.yOff = plotTree.yOff + 1.0/plotTree.totalD
+#
+# def creatPlot(inTree):
+#     fig = plt.figure(1, facecolor='white')
+#     fig.clf()
+#     axprops = dict(xticks=[], yticks=[])
+#     creatPlot.ax1 = plt.subplot(111, frameon=False, **axprops)
+#     plotTree.totalw = float(numleafs)
+#     plotTree.totalD = float(depth)
+#     plotTree.xOff = -0.5/plotTree.totalw
+#     plotTree.yOff = 1.0
+#     plotTree(inTree, (0.5,1.0), '', numleafs, depth)
+#     plt.show()
+#
+# getNumleafs(dt)
+# creatPlot(dt)

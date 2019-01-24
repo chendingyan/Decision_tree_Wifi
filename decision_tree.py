@@ -2,24 +2,18 @@ import numpy as np
 clean_data = np.loadtxt('co395-cbc-dt/wifi_db/clean_dataset.txt')
 noisy_data = np.loadtxt('co395-cbc-dt/wifi_db/noisy_dataset.txt')
 
-
 def sum_label(dataset):
     sum_1 = [0,0,0,0]
     for i in range(dataset.shape[0]):
-        if clean_data[i][7] == 1:
+        if dataset[i][7] == 1:
             sum_1[0]+=1
-        if clean_data[i][7] == 2:
+        if dataset[i][7] == 2:
             sum_1[1]+=1
-        if clean_data[i][7] == 3:
+        if dataset[i][7] == 3:
             sum_1[2]+=1
-        if clean_data[i][7] == 4:
+        if dataset[i][7] == 4:
             sum_1[3]+=1
     return sum_1
-
-
-
-
-
 
 def calentropy(dataset, sum_array):
     class_labels = np.unique(dataset[:,7])
@@ -35,10 +29,11 @@ def calentropy(dataset, sum_array):
 
 def find_split(training_dataset):
     sum_array = sum_label(training_dataset)
+    #print sum_array
     dataset_entropy = calentropy(training_dataset, sum_array)
     max_Gain = {'Wifi': 0 , 'Cut_point': 0.0, 'Gain': 0.0}
     for wifi in range(7):
-        wifi_length_unique = np.unique(training_dataset[:,wifi])
+        wifi_length_unique = np.unique(training_dataset[:, wifi])
         # wifi_midpoint=[]
         # for i in range(len(wifi_length_unique)-1):
         #     midpoint = (wifi_length_unique[i]+ wifi_length_unique[i+1])/2
@@ -61,13 +56,10 @@ def find_split(training_dataset):
                 max_Gain['Wifi'] = wifi+1
                 max_Gain['Cut_point'] = cut_point
                 max_Gain['Gain'] = Gain
-        # print 'wifi is =',wifi , max_Gain
-
     return max_Gain
 
 def decision_tree_learning(training_dataset, depth):
-    print np.unique(training_dataset[:,7])
-    if len(np.unique(training_dataset[:,7])) == 1 or depth >4 :
+    if len(np.unique(training_dataset[:,7])) == 1 :
         # leaf
         Attribute = np.unique(training_dataset[:,7])
         dt={'Attribute': Attribute, 'Value': 0, 'Left': None, 'Right': None, 'isLeaf': 1}
@@ -81,7 +73,6 @@ def decision_tree_learning(training_dataset, depth):
         right_index = np.where(training_dataset[:,wifi-1] > cut_point)
         left_dataset = training_dataset[left_index]
         right_dataset = training_dataset[right_index]
-        print(left_dataset.shape, right_dataset.shape)
         left_branch, left_depth = decision_tree_learning(left_dataset, depth+1)
         right_branch, right_depth = decision_tree_learning(right_dataset, depth+1)
         dt = {'Attribute': wifi, 'Value': cut_point, 'Left': left_branch, 'Right': right_branch, 'isLeaf': 0}
@@ -92,4 +83,4 @@ def decision_tree_learning(training_dataset, depth):
 def visualize(decision_tree):
     pass
 dt, depth = decision_tree_learning(clean_data, 0)
-print dt
+print depth
